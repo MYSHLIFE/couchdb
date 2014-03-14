@@ -45,38 +45,49 @@ function(app, FauxtonAPI, Config, Components) {
     },
 
     editValue: function (event) {
-      this.$(".js-show-value").addClass("js-hidden");
-      this.$(".js-edit-value-form").removeClass("js-hidden");
-      this.$(".js-value-input").focus();
+      this.$(event.currentTarget).find(".js-show-value").addClass("js-hidden");
+      this.$(event.currentTarget).find(".js-edit-value-form").removeClass("js-hidden");
+      this.$(event.currentTarget).find(".js-value-input").focus();
     },
 
     processKeyEvents: function (event) {
       // Enter key
       if (event.keyCode === 13) {
-        return this.saveAndRender();
+        return this.saveAndRender(event);
       }
       // Esc key
       if (event.keyCode === 27) {
-        return this.discardValue();
+        return this.discardValue(event);
       }
     },
 
     discardValue: function (event) {
-      this.$(".js-edit-value-form").addClass("js-hidden");
-      this.$(".js-show-value").removeClass("js-hidden");
+      this.$(event.currentTarget).parents('td').find(".js-edit-value-form").addClass("js-hidden");
+      this.$(event.currentTarget).parents('td').find(".js-show-value").removeClass("js-hidden");
     },
 
     cancelEdit: function (event) {
-      this.discardValue();
+      this.discardValue(event);
     },
 
     serialize: function () {
       return {option: this.model.toJSON()};
     },
+    saveAndRender: function (event) {
+      var options = {};
+        $input = this.$(event.currentTarget).parents('td').find(".js-value-input");
+        options[$input.attr('name')] = $input.val();
 
-    saveAndRender: function () {
-      this.model.save({value: this.$(".js-value-input").val()});
-      this.render();
+        if ($input.attr('name')==='name'){
+        var newModel = this.model.clone();
+          newModel.save(options);
+          this.model.destroy();
+          this.model = newModel;
+          this.render();
+        } else {
+        this.model.save(options);
+        this.render();
+        }
     }
 
   });
